@@ -1,23 +1,89 @@
-import logo from './logo.svg';
 import './App.css';
+import sketch  from './P5Component'
+import GoogleCalendar from './GoogleCalendar';
+import P5Wrapper from 'react-p5-wrapper';
+import React,{useEffect, useState} from 'react'
+import { gapi, getCalendars, getAllEvent, initGapi} from './CalendarAPI/calendarAPI';
+// import ApiCalendar from 'react-google-calendar-api';
 
 function App() {
+  const [calendars,setCalendars] = useState([]);
+  const [calendarLoaded, setCalendarLoaded] = useState(false)
+  const [selectedCalendar, setSelectedCalendar] = useState(null)
+
+  const printCalendars = () =>{
+    getCalendars().then((result)=>{
+      setCalendars(result)
+    })
+  }
+  useEffect(()=>{
+    if(calendars.length===0){
+      console.log("empty")
+    }
+    else{
+      console.log(calendars)
+      setCalendarLoaded(true)
+    }
+  },[calendars])
+
+
+  useEffect(()=>{
+    initGapi()
+  },[])
+
+
+  //handle change and set selected Calenar
+  const handleChange=(event)=>{
+    setSelectedCalendar(event.target.value)
+  }
+
+  useEffect(()=>{
+    if(selectedCalendar !== null){
+      console.log(selectedCalendar)
+    }
+  },[selectedCalendar])
+
+
+  const CalendarSelector = ({calendar}) => {
+    return(
+      <div>
+        <input type="radio" name="name" onChange={handleChange} value={calendar.id}/>
+        <label>{calendar.summary}</label>
+      </div>
+    );
+
+    // <form><input type="radio" name="fruit" value="사과"/></form>
+  }
+
+
+  const visualizeCalendar = () => {
+    getAllEvent(selectedCalendar)
+  }
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      webVisualizer
+      <GoogleCalendar/>
+      <button onClick={printCalendars}>Select Calendar</button>
+
+      {
+       calendarLoaded ? (
+         <>
+          <form>
+              <div>Please Select Calendar You Want to Visualize</div>
+
+              {
+                calendars.map((calendar)=>(
+                  <CalendarSelector calendar={calendar}/>
+                ))
+              }
+          </form>
+          <button onClick={visualizeCalendar}>Visualize this calendar</button>
+         </>
+       ): null
+      }
+
     </div>
   );
 }
