@@ -6,10 +6,13 @@ import React,{useEffect, useState} from 'react'
 import { gapi, getCalendars, getAllEvent, initGapi} from './CalendarAPI/calendarAPI';
 // import ApiCalendar from 'react-google-calendar-api';
 
+export let eventList = []
+
 function App() {
   const [calendars,setCalendars] = useState([]);
   const [calendarLoaded, setCalendarLoaded] = useState(false)
   const [selectedCalendar, setSelectedCalendar] = useState(null)
+  const [events,setEvents] = useState([])
 
   const printCalendars = () =>{
     getCalendars().then((result)=>{
@@ -56,8 +59,13 @@ function App() {
   }
 
 
+  useEffect(()=>{
+    eventList = events
+    console.log(eventList)
+
+  },[events])
   const visualizeCalendar = () => {
-    getAllEvent(selectedCalendar)
+    getAllEvent(selectedCalendar).then(events=>setEvents(events))
   }
 
 
@@ -80,10 +88,10 @@ function App() {
               }
           </form>
           <button onClick={visualizeCalendar}>Visualize this calendar</button>
+          <P5Wrapper sketch={sketch}/>
          </>
        ): null
       }
-
     </div>
   );
 }
